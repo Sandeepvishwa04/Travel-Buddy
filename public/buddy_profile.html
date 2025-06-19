@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buddy Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-image: url('./images/bgtb.avif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        .profile-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex-grow: 1;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            margin: 0;
+            color: #333;
+        }
+
+        .profile-location {
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: #333;
+        }
+
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .edit-button {
+            background-color: #2196F3;
+        }
+
+        .back-button {
+            background-color: #4CAF50;
+        }
+
+        .logout-button {
+            background-color: #f44336;
+        }
+
+        .requests-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+
+        .request-card {
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .accept-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .reject-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .chat-container {
+            /* Remove or comment out display */
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 10px;
+            padding: 15px;
+        }
+
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .message {
+            margin: 5px 0;
+            padding: 8px 12px;
+            border-radius: 15px;
+            max-width: 70%;
+        }
+
+        .sent {
+            background-color: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+
+        .received {
+            background-color: #e9ecef;
+            color: black;
+            margin-right: auto;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .chat-input button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let messagePollingIntervals = {};
+
+        function startMessagePolling(requestId) {
+            // Clear any existing interval for this request
+            if (messagePollingIntervals[requestId]) {
+                clearInterval(messagePollingIntervals[requestId]);
+            }
+            
+            // Start new polling interval
+            messagePollingIntervals[requestId] = setInterval(() => loadMessages(requestId), 1000); // Poll every second
+        }
+
+        async function sendMessage(requestId) {
+            const input = document.getElementById(`messageInput-${requestId}`);
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            try {
+                const response = await fetch('/api/chat/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        request_id: requestId,
+                        message: message,
+                        sender_type: 'guide'
+                    })
+                });
+
+                if (response.ok) {
+                    input.value = '';
+                    await loadMessages(requestId);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        }
+
+        async function loadMessages(requestId) {
+            try {
+                const response = await fetch(`/api/chat/${requestId}`);
+                const messages = await response.json();
+                
+                const chatMessages = document.getElementById(`chatMessages-${requestId}`);
+                if (!chatMessages) return;
+                
+                chatMessages.innerHTML = '';
+                
+                messages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${msg.sender_type === 'guide' ? 'sent' : 'received'}`;
+                    messageDiv.textContent = msg.message;
+                    chatMessages.appendChild(messageDiv);
+                });
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        // Add cleanup function
+        function cleanup(requestId) {
+            if (messagePollingIntervals[requestId]) {
+                clearInterval(messagePollingIntervals[requestId]);
+                delete messagePollingIntervals[requestId];
+            }
+        }
+
+        window.onload = async function() {
+            try {
+                const response = await fetch('/api/buddy_profile');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile');
+                }
+                const buddy = await response.json();
+                
+                // Store the post_id globally
+                window.currentPostId = buddy.post_id;
+                
+                // Update profile picture
+                const profilePic = document.querySelector('.profile-picture');
+                profilePic.src = buddy.profile_picture || '/default-profile-picture.jpg';
+                profilePic.onerror = function() {
+                    this.src = '/default-profile-picture.jpg';
+                };
+                
+                // Update name
+                document.querySelector('.profile-name').textContent = buddy.buddy_name;
+                
+                // Update location
+                document.querySelector('.profile-location').textContent = 
+                    `${buddy.place}, ${buddy.district}, ${buddy.state}, ${buddy.country}`;
+                
+                // Update other details
+                document.querySelector('[data-field="gender"]').textContent = buddy.gender;
+                document.querySelector('[data-field="mobile"]').textContent = buddy.mobile_no;
+                document.querySelector('[data-field="price"]').textContent = `₹${buddy.price_per_hour}`;
+                
+                // Update location details
+                document.querySelector('[data-field="location"]').innerHTML = 
+                    `Place: ${buddy.place}<br>
+                    District: ${buddy.district}<br>
+                    State: ${buddy.state}<br>
+                    Country: ${buddy.country}`;
+                
+                // Load requests after profile is loaded
+                loadRequests();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load profile data');
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/guide.html';
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
+        async function loadRequests() {
+            try {
+                
+                const response = await fetch('/api/guide_requests');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch requests');
+                }
+                const requests = await response.json();
+                const container = document.getElementById('requestsContainer');
+                container.innerHTML = '';
+
+                if (requests.length === 0) {
+                    container.innerHTML = '<p>No pending requests</p>';
+                    return;
+                }
+
+                requests.forEach(request => {
+                    const requestCard = document.createElement('div');
+                    requestCard.className = 'request-card';
+                    requestCard.innerHTML = `
+                        <h4>Request from ${request.traveler_name}</h4>
+                        <p>Phone: ${request.traveler_phone}</p>
+                        <p>Status: ${request.status || 'pending'}</p>
+                    `;
+                    container.appendChild(requestCard);
+                });
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                document.getElementById('requestsContainer').innerHTML = 
+                    '<p>Error loading requests. Please try again later.</p>';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="nav-buttons">
+        <button onclick="window.location.href='/guide.html'" class="nav-button back-button">
+            ← Back
+        </button>
+        <button onclick="window.location.href='/edit_buddy_profile.html'" class="nav-button edit-button">
+            Edit Profile
+        </button>
+        <button onclick="logout()" class="nav-button logout-button">
+            Logout
+        </button>
+    </div>
+    <div class="profile-container">
+        <div class="profile-header">
+            <img src="" alt="Profile Picture" class="profile-picture">
+            <div class="profile-info">
+                <h1 class="profile-name"></h1>
+                <p class="profile-location"></p>
+            </div>
+        </div>
+
+        <div class="profile-details">
+            <div class="detail-item">
+                <div class="detail-label">Gender</div>
+                <div class="detail-value" data-field="gender"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Mobile Number</div>
+                <div class="detail-value" data-field="mobile"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Price per Hour</div>
+                <div class="detail-value" data-field="price"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Location Details</div>
+                <div class="detail-value" data-field="location"></div>
+            </div>
+        </div>
+
+      
+        </div>
+    </div>
+</body>
+</html> 

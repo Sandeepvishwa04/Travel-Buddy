@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Buddy Profile</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('./images/bgtb.avif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="page-header">
+            <h2><i class="fas fa-user-edit"></i> Edit Your Profile</h2>
+        </div>
+        
+        <div class="scrollable-container">
+            <form id="editProfileForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="profile_picture">
+                        <div class="file-input-container">
+                            <i class="fas fa-cloud-upload-alt fa-2x" style="color: #4299e1; margin-bottom: 10px;"></i>
+                            <p>Drop your profile picture here or click to upload</p>
+                            <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;">
+                        </div>
+                    </label>
+                    <div id="image-preview" class="mt-3"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="buddy_name"><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" id="buddy_name" name="buddy_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobile_no"><i class="fas fa-phone"></i> Phone Number</label>
+                    <input type="tel" id="mobile_no" name="mobile_no" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="available_from"><i class="fas fa-calendar-check"></i> Available From</label>
+                    <input type="date" id="available_from" name="available_from" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="available_to"><i class="fas fa-calendar-check"></i> Available To</label>
+                    <input type="date" id="available_to" name="available_to" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="country">Country:</label>
+                    <input type="text" id="country" name="country" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="state">State:</label>
+                    <input type="text" id="state" name="state" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="district">District:</label>
+                    <input type="text" id="district" name="district" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="place">Place:</label>
+                    <input type="text" id="place" name="place" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="price_per_hour">Price per Hour:</label>
+                    <input type="number" id="price_per_hour" name="price_per_hour" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Languages Known:</label>
+                    <div class="languages-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="English"> English
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Hindi"> Hindi
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Tamil"> Tamil
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Telugu"> Telugu
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Malayalam"> Malayalam
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Kannada"> Kannada
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Bengali"> Bengali
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Marathi"> Marathi
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Gujarati"> Gujarati
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Punjabi"> Punjabi
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" name="gender" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="button-container">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Profile
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='/buddy_profile'">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        document.getElementById('profile_picture').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('image-preview');
+                    preview.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '200px';
+                    img.style.borderRadius = '10px';
+                    img.style.marginTop = '10px';
+                    preview.appendChild(img);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function loadProfileData() {
+            try {
+                const response = await fetch('/api/buddy_profile');
+                if (!response.ok) throw new Error('Failed to fetch profile');
+                
+                const profile = await response.json();
+                
+                document.getElementById('buddy_name').value = profile.buddy_name;
+                document.getElementById('mobile_no').value = profile.mobile_no;
+                
+                // Format dates properly
+                const formatDate = (dateString) => {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toISOString().split('T')[0];
+                };
+                
+                document.getElementById('available_from').value = formatDate(profile.available_from);
+                document.getElementById('available_to').value = formatDate(profile.available_to);
+                
+                document.getElementById('country').value = profile.country;
+                document.getElementById('state').value = profile.state;
+                document.getElementById('district').value = profile.district;
+                document.getElementById('place').value = profile.place;
+                document.getElementById('price_per_hour').value = profile.price_per_hour;
+                
+                // Set selected languages
+                if (profile.languages) {
+                    const languages = Array.isArray(profile.languages) ? profile.languages : [profile.languages];
+                    const checkboxes = document.querySelectorAll('input[name="languages"]');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = languages.includes(checkbox.value);
+                    });
+                }
+                
+                document.getElementById('gender').value = profile.gender;
+
+                // Load existing profile picture if available
+                if (profile.profile_picture) {
+                    const preview = document.getElementById('image-preview');
+                    preview.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = profile.profile_picture;
+                    img.style.maxWidth = '200px';
+                    img.style.borderRadius = '10px';
+                    img.style.marginTop = '10px';
+                    preview.appendChild(img);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load profile data');
+            }
+        }
+
+        document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            
+            const formData = new FormData(e.target);
+            
+            // Ensure dates are in the correct format
+            const fromDate = new Date(formData.get('available_from'));
+            const toDate = new Date(formData.get('available_to'));
+            
+            if (fromDate > toDate) {
+                alert('Available To date must be after Available From date');
+                hideLoading();
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/buddy_profile', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Failed to update profile');
+                
+                alert('Profile updated successfully!');
+                window.location.href = '/buddy_profile.html';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to update profile');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadProfileData);
+    </script>
+</body>
+</html> 

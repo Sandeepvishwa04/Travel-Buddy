@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('./images/bgtb.avif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .feedback-container {
+            width: 400px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .feedback-container h2 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #333;
+        }
+        .question {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        .star-rating {
+            display: flex;
+            gap: 5px;
+        }
+        .star-rating label {
+            font-size: 20px;
+            cursor: pointer;
+            color: #ccc;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffc107;
+        }
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .submit-button:hover {
+            background-color: #0056b3;
+        }
+        /* Popup (Modal) Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .modal-content h3 {
+            margin: 0;
+            color: #28a745;
+            font-size: 20px;
+        }
+        .close-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .close-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.location.href='/guide_profiles.html'" style="position: fixed; top: 20px; left: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        ← Back to Profiles
+    </button>
+
+    <div class="feedback-container">
+        <h2>Feedback</h2>
+        
+        <div class="input-group">
+            <p class="question">Was the guide knowledgeable about the area?</p>
+            <textarea rows="3" placeholder="Your answer here..."></textarea>
+        </div>
+        
+        <div class="input-group">
+            <p class="question">Would you recommend this guide to others?</p>
+            <textarea rows="3" placeholder="Your answer here..."></textarea>
+        </div>
+
+        <div class="input-group">
+            <p class="question">Overall experience rating:</p>
+            <div class="star-rating">
+                <input type="radio" name="rating" id="star5" value="5"><label for="star5">&#9733;</label>
+                <input type="radio" name="rating" id="star4" value="4"><label for="star4">&#9733;</label>
+                <input type="radio" name="rating" id="star3" value="3"><label for="star3">&#9733;</label>
+                <input type="radio" name="rating" id="star2" value="2"><label for="star2">&#9733;</label>
+                <input type="radio" name="rating" id="star1" value="1"><label for="star1">&#9733;</label>
+            </div>
+        </div>
+
+        <button class="submit-button" onclick="submitFeedback()">Submit Feedback</button>
+    </div>
+
+    <!-- Feedback Submitted Popup (Modal) -->
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <h3>Feedback Submitted!</h3>
+            <button class="close-button" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function submitFeedback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const postId = urlParams.get('postId');
+            
+            // Store feedback completion status
+            localStorage.setItem(`feedback_${postId}`, 'completed');
+            
+            // Show success message
+            document.getElementById("feedbackModal").style.display = "flex";
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = '/guide_profiles.html';
+            }, 2000);
+        }
+
+        function closeModal() {
+            document.getElementById("feedbackModal").style.display = "none";
+            window.location.href = '/guide_profiles.html';
+        }
+        
+        // Close the modal if the user clicks outside of it
+        window.onclick = function(event) {
+            var modal = document.getElementById("feedbackModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

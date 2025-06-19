@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buddy Registration</title>
+    <link rel="stylesheet" href="styles.css"> 
+    <style>
+        body {
+            background-image: url('./images/bgtb.avif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        .container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.login-section, .registration-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.login-section h3, .registration-section h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+@keyframes highlight {
+    0% { background-color: #ffffff; }
+    50% { background-color: #e3f2fd; }
+    100% { background-color: #ffffff; }
+}
+
+#registrationMessage {
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.view-profile-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.profile-btn {
+    padding: 10px 20px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.profile-btn:hover {
+    background-color: #1976D2;
+}
+    </style>
+</head>
+<body>
+    <button onclick="window.location.href='/'" style="position: fixed; top: 20px; left: 20px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        ← Back to Home
+    </button>
+    <div class="container">
+        <h2>Buddy Registration</h2>
+        
+        <!-- Add login section -->
+        <div class="login-section">
+            <h3>Already Registered? Login Here</h3>
+            <form id="loginForm" class="form">
+                <label for="login_guide_id">Guide ID:</label>
+                <input type="text" id="login_guide_id" name="login_guide_id" required>
+
+                <label for="login_password">Password:</label>
+                <input type="password" id="login_password" name="login_password" required>
+
+                <div id="loginMessage" style="display: none; margin: 10px 0;"></div>
+                <input type="submit" value="Login">
+            </form>
+        </div>
+
+        <div class="view-profile-section">
+            <h3>Want to View Your Profile?</h3>
+            <button onclick="viewProfile()" class="profile-btn">
+                View Profile
+            </button>
+        </div>
+
+        <div class="registration-section">
+            <h3>New Guide? Register Here</h3>
+            <form id="registrationForm" class="form" enctype="multipart/form-data">
+                
+                <label for="guide_name">Name:</label>
+                <input type="text" id="guide_name" name="guide_name" required>
+
+                <label for="guide_phone">Phone Number:</label>
+                <input type="tel" id="guide_phone" name="guide_phone" pattern="[0-9]{10}" required>
+
+                <!-- Gender Selection Field -->
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                </select>
+
+                <!-- ID Card Upload Field -->
+                <label for="guide_id_card">Upload Guide ID Card:</label>
+                <input type="file" id="guide_id_card" name="guide_id_card" accept="image/*" required>
+
+                <label for="guide_id">Guide ID:</label>
+                <input type="text" id="guide_id" name="guide_id" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="guide_password" required>
+
+                <!-- Terms and Conditions Checkbox -->
+                <label for="terms_conditions">
+                    <input type="checkbox" id="terms_conditions" name="terms_conditions" required>
+                    I agree to the <a href="terms_and_conditions.html" target="_blank">Terms and Conditions</a>
+                </label>
+
+                <div id="registrationMessage" style="display: none; margin: 10px 0;"></div>
+                <input type="submit" value="Register">
+            </form>
+        </div>
+    </div>
+
+    <!-- Traveler Login Button -->
+    <a href="traveler.html" class="button-link">
+        <button class="login-btn-top-right">Traveller Login</button>
+    </a>
+
+    <script>
+    document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+            const formData = new FormData(e.target);
+            const response = await fetch('/submit_guide_registration', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            const messageDiv = document.getElementById('registrationMessage');
+            messageDiv.style.display = 'block';
+            
+            if (data.success) {
+                messageDiv.style.color = 'green';
+                messageDiv.textContent = data.message;
+                
+                // Clear the form
+                e.target.reset();
+                
+                // Scroll to login section
+                document.querySelector('.login-section').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+                
+                // Optional: Highlight login section
+                document.querySelector('.login-section').style.animation = 'highlight 2s';
+            } else {
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = data.message;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            const messageDiv = document.getElementById('registrationMessage');
+            messageDiv.style.display = 'block';
+            messageDiv.style.color = 'red';
+            messageDiv.textContent = 'An error occurred. Please try again.';
+        }
+    });
+    </script>
+
+    <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+            const formData = new FormData(e.target);
+            const loginData = {
+                login_guide_id: formData.get('login_guide_id'),
+                login_password: formData.get('login_password')
+            };
+
+            const response = await fetch('/guide_login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginData)
+            });
+            
+            const data = await response.json();
+            
+            const messageDiv = document.getElementById('loginMessage');
+            messageDiv.style.display = 'block';
+            
+            if (data.success) {
+                messageDiv.style.color = 'green';
+                messageDiv.textContent = 'Login successful! Redirecting...';
+                // Immediately redirect to the specified URL
+                window.location.href = data.redirectUrl;
+            } else {
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = data.message;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            const messageDiv = document.getElementById('loginMessage');
+            messageDiv.style.display = 'block';
+            messageDiv.style.color = 'red';
+            messageDiv.textContent = 'An error occurred. Please try again.';
+        }
+    });
+    </script>
+
+    <script>
+    async function viewProfile() {
+        try {
+            const response = await fetch('/api/check-profile');
+            const data = await response.json();
+            
+            if (!data.isLoggedIn) {
+                // If not logged in, highlight the login section
+                document.querySelector('.login-section').scrollIntoView({ behavior: 'smooth' });
+                document.querySelector('.login-section').style.animation = 'highlight 2s';
+                return;
+            }
+            
+            if (!data.hasProfile) {
+                window.location.href = '/buddy_post.html';
+            } else {
+                window.location.href = '/buddy_profile';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+    </script>
+</body>
+</html>

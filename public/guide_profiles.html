@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Available Buddies</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" type="text/css" href="traveller.css">
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=TvUxr800"></script>
+  <style>
+    /* Add this to your existing styles */
+    .buddy-card p {
+      margin: 8px 0;
+      line-height: 1.4;
+    }
+    
+    .buddy-card p:nth-child(4) { /* Price per Hour text */
+      color: #2c5282;
+      font-weight: 500;
+    }
+    body {
+        background-image: url('./images/bgtb.avif');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    .buddy-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .availability-dates {
+        background-color: #e3f2fd;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+        font-size: 0.9em;
+    }
+
+    .languages-section {
+        background-color: #f0f7ff;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+        font-size: 0.9em;
+    }
+
+    .languages-section p {
+        margin: 0;
+        color: #2c5282;
+    }
+
+    .availability-dates span {
+        font-weight: bold;
+        color: #1976D2;
+    }
+  </style>
+</head>
+<body>
+  <!-- Add chatbot HTML structure after the opening body tag -->
+  <div class="chatbot-container">
+    <div class="chatbot-header">
+      <h3>Travel Buddy Assistant</h3>
+      <button onclick="toggleChat()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+      <input type="text" id="userInput" placeholder="Ask about travel recommendations..." 
+             style="width: 80%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 8px;">
+      <button onclick="sendMessage()" 
+              style="background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+        Send
+      </button>
+    </div>
+    <div class="voice-controls">
+      <select id="voiceLanguage" class="language-select">
+        <option value="en-US">English</option>
+        <option value="ta-IN">Tamil</option>
+        <option value="hi-IN">Hindi</option>
+        <option value="te-IN">Telugu</option>
+        <option value="ml-IN">Malayalam</option>
+        <option value="kn-IN">Kannada</option>
+      </select>
+      <button onclick="startVoiceRecognition()" class="voice-button">
+        🎤 Voice Input
+      </button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%;">
+      <h2>Available Buddy Posts</h2>
+      <button onclick="goBack()" class="back-button">Back to Login</button>
+    </div>
+
+    <!-- Add chat button here, right after the header -->
+    <button class="chat-trigger-button" onclick="toggleChat()">💬 Chat with Travel Buddy</button>
+
+    <!-- Search bar -->
+    <input type="text" id="searchInput" placeholder="Search by location..." oninput="filterBuddyPosts()" 
+           style="padding: 10px; margin-bottom: 20px; width: 100%; max-width: 600px; border-radius: 8px; border: 1px solid #ccc;">
+  
+    <div id="buddy-posts-container" class="profiles-container"></div>
+  </div>
+
+  <!-- Sidebar for Booked Guides -->
+  <div class="sidebar" id="bookedGuidesSidebar">
+    <h3>Booked Guides</h3>
+    <ul id="bookedGuidesList"></ul>
+  </div>
+
+  <!-- Booking Confirmation Modal -->
+  <div id="bookingConfirmationModal" class="modal">
+    <div class="modal-content">
+      <h3>Guide Booked!</h3>
+      <p>Your guide has been successfully booked.</p>
+      <button class="close-modal" onclick="closeBookingConfirmation()">Close</button>
+    </div>
+  </div>
+
+  <!-- Update the OTP modal with 4-digit verification UI -->
+  <div id="otpModal" class="otp-modal">
+    <div class="otp-modal-content">
+        <h3>Guide Verification</h3>
+        <p id="otpMessageText"></p>
+        <div class="otp-input-container">
+            <input type="text" id="otpInput" placeholder="Enter 4-digit OTP" maxlength="4" />
+            <button class="verify-button" onclick="verifyOTP()">Verify OTP</button>
+        </div>
+        <div id="verificationResult"></div>
+        <button class="close-otp-modal" onclick="closeOtpModal()">Close</button>
+    </div>
+  </div>
+
+  <style>
+    .otp-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .otp-modal-content {
+        background-color: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+    }
+
+    .otp-input-container {
+        margin: 20px 0;
+    }
+
+    #otpInput {
+        padding: 12px;
+        font-size: 20px;
+        width: 120px;
+        text-align: center;
+        letter-spacing: 8px;
+        margin-right: 10px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .verify-button {
+        padding: 12px 25px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+
+    .verify-button:hover {
+        background-color: #45a049;
+    }
+
+    .close-otp-modal {
+        margin-top: 15px;
+        padding: 8px 20px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    #verificationResult {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 4px;
+        display: none;
+    }
+
+    .success-message {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        padding: 15px;
+    }
+
+    .error-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        padding: 15px;
+    }
+  </style>
+
+  <script>
+    // Global variables
+    let currentLanguage = 'en';
+    let translations = {};
+    let currentlyBookedGuide = null;
+
+    // Load translations
+    async function loadTranslations(lang) {
+      try {
+        const response = await fetch(`/translations/${lang}.json`);
+        translations = await response.json();
+        updatePageContent();
+      } catch (error) {
+        console.error('Error loading translations:', error);
+      }
+    }
+
+    // Change language
+    async function changeLanguage(lang) {
+      currentLanguage = lang;
+      await loadTranslations(lang);
+      localStorage.setItem('preferredLanguage', lang);
+    }
+
+    // Update page content with translations
+    function updatePageContent() {
+      // Update navigation
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        element.textContent = getTranslation(key);
+      });
+      
+      // Update dynamic content
+      updateBuddyCards();
+      updateSidebar();
+    }
+
+    // Get nested translations
+    function getTranslation(key) {
+      const keys = key.split('.');
+      let value = translations;
+      for (const k of keys) {
+        value = value?.[k];
+      }
+      return value || key;
+    }
+
+    // Initialize language
+    document.addEventListener('DOMContentLoaded', async () => {
+      const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
+      await loadTranslations(savedLanguage);
+      document.getElementById('languageSelect').value = savedLanguage;
+    });
+
+    // Array to store booked guides
+    const bookedGuides = [];
+  
+    // Fetch buddy posts from the server and display them as cards
+    async function fetchBuddyPosts() {
+      try {
+        const response = await fetch('/api/buddy_posts');
+        if (!response.ok) throw new Error('Failed to fetch buddy posts');
+        
+        const buddyPosts = await response.json();
+        const buddyPostsContainer = document.getElementById('buddy-posts-container');
+        buddyPostsContainer.innerHTML = '';
+  
+        if (buddyPosts.length === 0) {
+          buddyPostsContainer.innerHTML = '<p>No buddies available at the moment.</p>';
+          return;
+        }
+  
+        buddyPosts.forEach(post => {
+          const postCard = document.createElement('div');
+          postCard.className = 'buddy-card';
+          postCard.id = `buddy-card-${post.post_id}`;
+  
+          const profilePicture = post.profile_picture ? post.profile_picture : 'default-image.jpg';
+          
+          // Format dates properly
+          const formatDate = (dateString) => {
+            if (!dateString) return 'Not specified';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+          };
+          
+          const fromDate = formatDate(post.available_from);
+          const toDate = formatDate(post.available_to);
+          
+          // Format languages
+          let languagesDisplay = 'Not specified';
+          if (post.languages) {
+              if (Array.isArray(post.languages)) {
+                  languagesDisplay = post.languages.join(', ');
+              } else if (typeof post.languages === 'string') {
+                  languagesDisplay = post.languages;
+              }
+          }
+          
+          postCard.innerHTML = `
+            <img src="${profilePicture}" alt="${post.buddy_name}'s Profile" class="buddy-image" />
+            <h3>${post.buddy_name}</h3>
+            <p>📍 Location: ${post.place}, ${post.district}, ${post.state}, ${post.country}</p>
+            <p>💰 Price per Hour: ₹${post.price_per_hour || 'Not specified'}</p>
+            <div class="availability-dates">
+                Available from <span>${fromDate}</span> to <span>${toDate}</span>
+            </div>
+            <div class="languages-section">
+                <p>🗣️ Languages: ${languagesDisplay}</p>
+            </div>
+            <button class="connect-button" onclick="bookGuide('${post.buddy_name}', '${profilePicture}', '${post.place}, ${post.district}, ${post.state}, ${post.country}', '${post.mobile_no}', '${post.post_id}', '${post.price_per_hour}')">Book Now</button>
+          `;
+
+          // Remove any raw array display that might be present
+          const languageElements = postCard.querySelectorAll('.languages-section p');
+          if (languageElements.length > 1) {
+              languageElements[1].remove();
+          }
+  
+          buddyPostsContainer.appendChild(postCard);
+        });
+      } catch (error) {
+        console.error('Error fetching buddy posts:', error);
+      }
+    }
+  
+    function bookGuide(name, image, location, phone, postId, price) {
+      if (currentlyBookedGuide !== null) {
+        alert('Please complete the current booking before booking another guide.');
+        return;
+      }
+
+      const bookedGuide = { name, image, location, phone, postId, price };
+      currentlyBookedGuide = bookedGuide;
+      bookedGuides.length = 0;
+      bookedGuides.push(bookedGuide);
+      updateSidebar();
+      showBookingConfirmation();
+    }
+
+    // Function to update the sidebar with booked guides
+    function updateSidebar() {
+      const sidebar = document.getElementById('bookedGuidesSidebar');
+      const list = document.getElementById('bookedGuidesList');
+      list.innerHTML = '';
+  
+      if (currentlyBookedGuide) {
+        const guide = currentlyBookedGuide;
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+          <p><strong>${guide.name}</strong></p>
+          <p>${guide.location}</p>
+          <p>📞 ${guide.phone}</p>
+          <p>💰 Price per Hour: ₹${guide.price || 'Not specified'}</p>
+          <button onclick="callGuide('${guide.phone}')">Call Now</button>
+          <button onclick="window.location.href='/payment.html?postId=${guide.postId}&price=${guide.price}'">Payment</button>
+          
+          <button onclick="cancelBooking()" style="background-color: #dc3545;">Cancel Booking</button>
+          
+        `;
+        list.appendChild(listItem);
+      }
+  
+      sidebar.classList.add('open');
+    }
+  
+    // Function to handle calling the guide
+    function callGuide(phone) {      window.location.href = `tel:${phone}`;
+    }
+  
+    // Function to show booking confirmation modal
+    function showBookingConfirmation() {
+      const modal = document.getElementById('bookingConfirmationModal');
+      modal.style.display = 'flex';
+    }
+  
+    // Function to close booking confirmation modal
+    function closeBookingConfirmation() {
+      const modal = document.getElementById('bookingConfirmationModal');
+      modal.style.display = 'none';
+    }
+
+    function filterBuddyPosts() {
+  const searchInput = document.getElementById('searchInput').value.toLowerCase();
+  const buddyCards = document.querySelectorAll('.buddy-card');
+
+  buddyCards.forEach(card => {
+    const locationText = card.querySelector('p').innerText.toLowerCase();
+    // Show only cards with matching location
+    if (locationText.includes(searchInput)) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+  
+    // Fetch buddy posts when the page loads
+    window.onload = function() {
+      fetchBuddyPosts();
+      updateSidebar();
+    };
+
+    // Add new chatbot JavaScript functions before the existing scripts
+    let isChatVisible = false;
+
+    function toggleChat() {
+      const chatContainer = document.querySelector('.chatbot-container');
+      const triggerButton = document.querySelector('.chat-trigger-button');
+      
+      if (chatContainer.style.display === 'none' || !chatContainer.style.display) {
+        chatContainer.style.display = 'flex';
+        triggerButton.style.display = 'none'; // Hide trigger button when chat is open
+      } else {
+        chatContainer.style.display = 'none';
+        triggerButton.style.display = 'block'; // Show trigger button when chat is closed
+      }
+    }
+
+    // Add speech recognition functionality
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    function startVoiceRecognition() {
+      const languageSelect = document.getElementById('voiceLanguage');
+      recognition.lang = languageSelect.value;
+      
+      // Show recording indicator
+      const voiceButton = document.querySelector('.voice-button');
+      voiceButton.style.backgroundColor = '#ff4444';
+      voiceButton.textContent = '🎤 Recording...';
+      
+      recognition.start();
+      
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('userInput').value = transcript;
+        sendMessage();
+      };
+      
+      recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        alert('Speech recognition error. Please try again.');
+        resetVoiceButton();
+      };
+      
+      recognition.onend = function() {
+        resetVoiceButton();
+      };
+    }
+
+    function resetVoiceButton() {
+      const voiceButton = document.querySelector('.voice-button');
+      voiceButton.style.backgroundColor = '#4CAF50';
+      voiceButton.textContent = '🎤 Voice Input';
+    }
+
+    // Modified sendMessage function to handle both text and voice output
+    async function sendMessage() {
+      const userInput = document.getElementById('userInput');
+      const message = userInput.value.trim();
+      if (!message) return;
+
+      // Display user message
+      addMessage(message, 'user-message');
+      userInput.value = '';
+
+      try {
+        const selectedLanguage = document.getElementById('voiceLanguage').value;
+        
+        // Language-specific prompts
+        const languagePrompts = {
+          'en-US': `Respond in English to: ${message}`,
+          'ta-IN': `Translate and respond in Tamil to: ${message}. Provide the response in Tamil script.`,
+          'hi-IN': `Translate and respond in Hindi to: ${message}. Provide the response in Devanagari script.`,
+          'te-IN': `Translate and respond in Telugu to: ${message}. Provide the response in Telugu script.`,
+          'ml-IN': `Translate and respond in Malayalam to: ${message}. Provide the response in Malayalam script.`,
+          'kn-IN': `Translate and respond in Kannada to: ${message}. Provide the response in Kannada script.`
+        };
+
+        const prompt = languagePrompts[selectedLanguage] || languagePrompts['en-US'];
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBbqq7fpUNVUqyDwA9KvqJMdoK_s0ke-Ak`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 800
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('API Error Details:', errorData);
+          throw new Error(`API request failed: ${errorData.error?.message || 'Unknown error'}`);
+        }
+
+        const data = await response.json();
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+          const botResponse = data.candidates[0].content.parts[0].text;
+          addMessage(botResponse, 'bot-message');
+          // Speak the response
+          speakResponse(botResponse, selectedLanguage);
+        }
+      } catch (error) {
+        console.error('Detailed error:', error);
+        addMessage(`Error: ${error.message}. Please try again.`, 'bot-message error');
+      }
+    }
+
+    // Modified speakResponse function using ResponsiveVoice
+    function speakResponse(text, language) {
+      // Map language codes to ResponsiveVoice voices
+      const voiceMap = {
+        'en-US': 'UK English Female',
+        'ta-IN': 'Tamil Male',
+        'hi-IN': 'Hindi Female',
+        'te-IN': 'Telugu Male',
+        'ml-IN': 'Malayalam Male',
+        'kn-IN': 'Kannada Male'
+      };
+
+      const selectedVoice = voiceMap[language] || voiceMap['en-US'];
+
+      // Cancel any ongoing speech
+      if (responsiveVoice.isPlaying()) {
+        responsiveVoice.cancel();
+      }
+
+      // Add the required attribution for non-commercial use
+      if (!document.getElementById('rv-attribution')) {
+        const attribution = document.createElement('div');
+        attribution.id = 'rv-attribution';
+        attribution.innerHTML = 'ResponsiveVoice used under Non-Commercial License';
+        attribution.style.fontSize = '0.8em';
+        attribution.style.color = '#666';
+        document.body.appendChild(attribution);
+      }
+
+      // Speak the text
+      responsiveVoice.speak(text, selectedVoice, {
+        pitch: 1,
+        rate: 0.9,
+        volume: 1,
+        onstart: () => console.log('Started speaking'),
+        onend: () => console.log('Finished speaking'),
+        onerror: (e) => console.error('Speech error:', e)
+      });
+    }
+
+    // Modified addMessage function
+    function addMessage(text, className) {
+      const chatMessages = document.getElementById('chatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${className}`;
+      messageDiv.innerHTML = text;
+      
+      if (className === 'bot-message' && !className.includes('error')) {
+        const audioControls = document.createElement('div');
+        audioControls.className = 'audio-controls';
+        
+        const playButton = document.createElement('button');
+        playButton.className = 'audio-button';
+        playButton.innerHTML = '🔊 Play';
+        playButton.onclick = () => {
+          const language = document.getElementById('voiceLanguage').value;
+          speakResponse(text, language);
+        };
+
+        const stopButton = document.createElement('button');
+        stopButton.className = 'audio-button';
+        stopButton.innerHTML = '⏹️ Stop';
+        stopButton.onclick = () => {
+          responsiveVoice.cancel();
+        };
+
+        audioControls.appendChild(playButton);
+        audioControls.appendChild(stopButton);
+        messageDiv.appendChild(audioControls);
+      }
+      
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Initialize voices when the page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+      const voices = await initializeVoices();
+      console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+    });
+
+    // Add event listener for Enter key
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('userInput');
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+    });
+
+    // Add chat trigger button dynamically
+    document.addEventListener('DOMContentLoaded', () => {
+      const triggerButton = document.createElement('button');
+      triggerButton.className = 'chat-trigger-button';
+      triggerButton.innerHTML = '💬 Chat with Travel Buddy';
+      triggerButton.onclick = toggleChat;
+      document.body.appendChild(triggerButton);
+      
+      // Initialize chat as hidden
+      const chatContainer = document.querySelector('.chatbot-container');
+      chatContainer.style.display = 'none';
+    });
+
+    function goBack() {
+      window.location.href = '/traveler.html';
+    }
+
+    function cancelBooking() {
+      currentlyBookedGuide = null;
+      bookedGuides.length = 0;
+      updateSidebar();
+    }
+
+    // Add event listener for language changes
+    document.getElementById('voiceLanguage').addEventListener('change', function() {
+      console.log('Selected language:', this.value);
+    });
+
+    let generatedOtp = ''; // Variable to store the generated OTP
+
+    async function generateOTP() {
+        try {
+            if (!currentlyBookedGuide || !currentlyBookedGuide.phone) {
+                alert('No guide currently booked');
+                return;
+            }
+
+            let phoneNumber = currentlyBookedGuide.phone;
+            
+            const response = await fetch('/api/generate-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ phoneNumber })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                generatedOtp = data.otp; // Store the OTP
+                const otpMessageText = document.getElementById('otpMessageText');
+                otpMessageText.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        OTP has been sent to <strong>${phoneNumber}</strong><br>
+                       
+                        Please enter the OTP below to verify
+                    </div>
+                `;
+                document.getElementById('otpModal').style.display = 'flex';
+                document.getElementById('verificationResult').style.display = 'none';
+                document.getElementById('otpInput').value = '';
+            } else {
+                throw new Error(data.message || 'Failed to send OTP');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to send OTP: ' + error.message);
+        }
+    }
+
+    async function verifyOTP() {
+        try {
+            const otpInput = document.getElementById('otpInput');
+            const verificationResult = document.getElementById('verificationResult');
+
+            if (!otpInput || !verificationResult) {
+                console.error('Required elements not found');
+                return;
+            }
+
+            const enteredOTP = otpInput.value.trim();
+
+            if (!enteredOTP) {
+                alert('Please enter the OTP');
+                return;
+            }
+
+            let phoneNumber = currentlyBookedGuide.phone;
+            // Format phone number if needed
+            if (!phoneNumber.startsWith('+91')) {
+                phoneNumber = '+91' + phoneNumber.replace(/\D/g, '');
+            }
+
+            console.log('Sending verification request:', { phoneNumber, code: enteredOTP }); // Debug log
+
+            const response = await fetch('/api/verify-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phoneNumber: phoneNumber,
+                    code: enteredOTP
+                })
+            });
+
+            const data = await response.json();
+            console.log('Verification response:', data); // Debug log
+
+            if (data.success && data.valid) {
+                verificationResult.innerHTML = `
+                    <div style="text-align: center;">
+                        <h4 style="color: #155724; margin-bottom: 10px;">✅ Verification Successful!</h4>
+                        <p style="margin: 0;">You are now connected with your guide.</p>
+                        <p style="margin-top: 5px;">Guide Name: <strong>${currentlyBookedGuide.name}</strong></p>
+                        <p style="margin-top: 5px;">Phone: <strong>${currentlyBookedGuide.phone}</strong></p>
+                    </div>
+                `;
+                verificationResult.className = 'success-message';
+                verificationResult.style.display = 'block';
+                document.querySelector('.otp-input-container').style.display = 'none';
+            } else {
+                verificationResult.innerHTML = `
+                    <div style="color: #721c24;">
+                        ❌ Invalid OTP. Please try again.
+                        <br>
+                        <small>Make sure you enter the OTP received in your SMS</small>
+                    </div>
+                `;
+                verificationResult.className = 'error-message';
+                verificationResult.style.display = 'block';
+                otpInput.value = ''; // Clear the input for retry
+                otpInput.focus(); // Focus the input for convenience
+            }
+        } catch (error) {
+            console.error('Error in verifyOTP:', error);
+            alert('Verification failed: ' + error.message);
+        }
+    }
+
+    // Add this helper function to format phone numbers
+    function formatPhoneNumber(phone) {
+        const cleaned = phone.replace(/\D/g, '');
+        return cleaned.startsWith('91') ? `+${cleaned}` : `+91${cleaned}`;
+    }
+
+    // Update the input validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const otpInput = document.getElementById('otpInput');
+        if (otpInput) {
+            otpInput.addEventListener('input', function(e) {
+                // Allow only numbers
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Limit to 4 digits
+                if (this.value.length > 4) {
+                    this.value = this.value.slice(0, 4);
+                }
+            });
+
+            // Add keypress event for auto-submit
+            otpInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && this.value.length === 4) {
+                    verifyOTP();
+                }
+            });
+        }
+    });
+
+    function closeOtpModal() {
+        document.getElementById('otpModal').style.display = 'none';
+        document.getElementById('otpInput').value = '';
+        document.getElementById('verificationResult').style.display = 'none';
+        document.querySelector('.otp-input-container').style.display = 'block';
+    }
+  </script>
+  
+</body>
+</html>
+

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traveler Login / Register</title>
+    <link rel="stylesheet" href="/styles.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+    <style>
+        body {
+            background-image: url('./images/bgtb.avif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 400px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"],
+        input[type="tel"],
+        select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        p {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Checkbox label specific styling */
+        label[for="terms_conditions"] {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        input[type="checkbox"] {
+            margin: 0;
+        }
+
+        /* Back button positioning */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .back-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.location.href='/'" class="back-button">
+        ← Back to Home
+    </button>
+
+    <div class="container">
+        <h2 id="form-title">Traveler Login</h2>
+
+        <!-- Login Form -->
+        <form id="travelerLoginForm" action="/submit_traveler_login" method="POST" class="form">
+            <label for="login_email">Email:</label>
+            <input type="email" id="login_email" name="traveller_email" required>
+
+            <label for="login_password">Password:</label>
+            <input type="password" id="login_password" name="traveller_password" required>
+
+            <input type="submit" value="Login">
+            <p>Don't have an account? <a href="#" id="show-register">Register here</a></p>
+        </form>
+
+        <!-- Registration Form -->
+        <form id="travelerRegisterForm" action="/submit_traveler_registration" method="POST" class="form" style="display: none;">
+            <label for="register_name">Name:</label>
+            <input type="text" id="register_name" name="traveller_name" required>
+
+            <label for="register_email">Email:</label>
+            <input type="email" id="register_email" name="traveller_email" required>
+
+            <label for="register_password">Password:</label>
+            <input type="password" id="register_password" name="traveller_password" required>
+
+            <label for="register_phone">Phone No:</label>
+            <input type="tel" id="register_phone" name="traveller_phone" required>
+
+            <label for="register_gender">Gender:</label>
+            <select id="register_gender" name="gender" required>
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <!-- Terms and Conditions Checkbox -->
+            <label for="terms_conditions">
+                <input type="checkbox" id="terms_conditions" name="terms_conditions" required>
+                I agree to the <a href="/terms_and_conditions.html" target="_blank">Terms and Conditions</a>.
+            </label>
+
+            <input type="submit" value="Register">
+            <p>Already have an account? <a href="#" id="show-login">Login here</a></p>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize intl-tel-input for the phone field
+            const phoneInputField = document.getElementById('register_phone');
+            const iti = window.intlTelInput(phoneInputField, {
+                initialCountry: "auto",
+                geoIpLookup: function(callback) {
+                    fetch('http://localhost:3000/ipinfo')
+                        .then(response => response.json())
+                        .then(data => callback(data.country))
+                        .catch(() => callback('us')); // Fallback to the US
+                },
+                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"
+            });
+
+            // Handle login form submission
+            document.getElementById('travelerLoginForm').addEventListener('submit', async function(event) {
+                event.preventDefault(); // Prevent form submission
+
+                // Collect login details
+                const email = document.getElementById('login_email').value;
+                const password = document.getElementById('login_password').value;
+
+                // Send login request to the server
+                const response = await fetch('/submit_traveler_login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ traveller_email: email, traveller_password: password }),
+                });
+
+                if (response.ok) {
+                    // Redirect to the buddy posts page
+                    window.location.href = '/guide_profiles.html'; // Change this to the actual URL where the buddy posts page is served
+                } else {
+                    alert('Login failed! Please check your credentials.');
+                }
+            });
+
+            // Handle register form submission
+            document.getElementById('travelerRegisterForm').addEventListener('submit', async function(event) {
+                event.preventDefault(); // Prevent form submission
+
+                // Collect registration details
+                const name = document.getElementById('register_name').value;
+                const email = document.getElementById('register_email').value;
+                const password = document.getElementById('register_password').value;
+                const phone = document.getElementById('register_phone').value;
+                const gender = document.getElementById('register_gender').value;
+
+                // Send registration request to the server
+                const response = await fetch('/submit_traveler_registration', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ traveller_name: name, traveller_email: email, traveller_password: password, traveller_phone: phone, gender: gender }),
+                });
+
+                if (response.ok) {
+                    alert('Registration successful! You can now log in.');
+                    document.getElementById('travelerRegisterForm').style.display = 'none';
+                    document.getElementById('travelerLoginForm').style.display = 'block';
+                    document.getElementById('form-title').innerText = 'Traveler Login';
+                } else {
+                    alert('Registration failed! Please try again.');
+                }
+            });
+
+            // Show the registration form and hide the login form
+            document.getElementById('show-register').addEventListener('click', function(event) {
+                event.preventDefault();
+                document.getElementById('travelerLoginForm').style.display = 'none';
+                document.getElementById('travelerRegisterForm').style.display = 'block';
+                document.getElementById('form-title').innerText = 'Traveler Register';
+            });
+
+            // Show the login form and hide the registration form
+            document.getElementById('show-login').addEventListener('click', function(event) {
+                event.preventDefault();
+                document.getElementById('travelerRegisterForm').style.display = 'none';
+                document.getElementById('travelerLoginForm').style.display = 'block';
+                document.getElementById('form-title').innerText = 'Traveler Login';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+.language-switcher {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.language-switcher select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+/* Language-specific font adjustments */
+[lang="ta"] *,
+[lang="hi"] *,
+[lang="te"] *,
+[lang="kn"] *,
+[lang="ml"] * {
+  font-family: 'Noto Sans', system-ui, -apple-system, sans-serif;
+} 

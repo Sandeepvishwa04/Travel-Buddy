@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('./images/bgtb.avif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .payment-container {
+            width: 400px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .payment-container h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .submit-button:hover {
+            background-color: #0056b3;
+        }
+        .success-message {
+            display: none;
+            text-align: center;
+            color: #28a745;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .feedback-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .feedback-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.location.href='/guide_profiles.html'" style="position: fixed; top: 20px; left: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        ← Back to Profiles
+    </button>
+    <div class="payment-container">
+        <h2>Payment</h2>
+        
+        <form id="paymentForm">
+            <div class="input-group">
+                <label for="name">Name on Card</label>
+                <input type="text" id="name" placeholder="John Doe" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="card-number">Card Number</label>
+                <input type="text" id="card-number" placeholder="1234 5678 9012 3456" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="expiry">Expiry Date</label>
+                <input type="text" id="expiry" placeholder="MM/YY" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="cvv">CVV</label>
+                <input type="text" id="cvv" placeholder="123" required>
+            </div>
+            
+            <button type="submit" class="submit-button">Make Payment</button>
+        </form>
+
+        <p id="successMessage" class="success-message">Payment Successful! ✓</p>
+        <button id="feedbackButton" onclick="goToFeedback()" class="feedback-button">
+            Provide Feedback
+        </button>
+    </div>
+
+    <script>
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            setTimeout(() => {
+                document.getElementById('paymentForm').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('feedbackButton').style.display = 'block';
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const postId = urlParams.get('postId');
+                localStorage.setItem(`payment_${postId}`, 'completed');
+            }, 1500);
+        });
+
+        function goToFeedback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const postId = urlParams.get('postId');
+            window.location.href = `/feedback.html?postId=${postId}`;
+        }
+    </script>
+</body>
+</html>

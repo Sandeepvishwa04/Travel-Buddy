@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Buddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .hero-section {
+            position: relative;
+            text-align: center;
+            padding: 80px 20px;
+            color: #ffffff;
+            background: url('https://img.freepik.com/premium-photo/blue-background-blue-suitcase-is-filled-with-landmarks-travel-accessories_717906-101004.jpg?w=1380') no-repeat center center;
+            background-size: cover;
+            height: 30vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .title {
+            font-size: 4em;
+            margin: 0.2em 0;
+            font-weight: 700;
+            color: #ffeb3b;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7);
+            font-family: 'Lobster', cursive;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tagline {
+            font-size: 1.5em;
+            margin: 10px 0 30px 0;
+            color: #ffc107;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-button {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.3em;
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-button:hover {
+            background-color: #218838;
+            transform: translateY(-3px);
+        }
+
+        .dropdown {
+    display: none; /* Initially hidden */
+    position: absolute; /* Positioned relative to the button */
+    top: calc(100% + 10px); /* Positioned below the button with a gap (10px) */
+    left: 50%; /* Centered horizontally */
+    transform: translateX(-50%); /* Adjust positioning */
+    background-color: #ffffff; /* White background for dropdown */
+    border-radius: 12px; /* Rounded corners */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); /* Softer, wider shadow */
+    z-index: 10; /* Higher stacking order */
+    overflow: hidden; /* Prevent content overflow */
+    transition: max-height 0.3s ease-out, opacity 0.3s ease; /* Smooth animation */
+    max-height: 0; /* Start hidden with height */
+    opacity: 0; /* Start hidden with opacity */
+    width: 200px; /* Set a fixed width or adjust dynamically if needed */
+}
+
+.dropdown.show {
+    display: block; /* Show on hover */
+    max-height: 300px; /* Set a max height for transition */
+    opacity: 1; /* Fade in */
+}
+
+.dropdown a {
+    display: block; /* Block level for links */
+    padding: 12px 20px; /* Padding for links */
+    color: #333; /* Link color */
+    text-decoration: none; /* Remove underline */
+    font-size: 1em; /* Standard font size */
+    font-weight: 500; /* Font weight for better visibility */
+    position: relative; /* For pseudo-elements */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.dropdown a:hover {
+    background-color: #007bff; /* Change background color on hover */
+    color: white; /* Change text color on hover */
+}
+
+.dropdown a::before {
+    content: ""; /* Pseudo-element for decorative effect */
+    position: absolute; /* Positioned relative to links */
+    left: 0; /* Align to left */
+    height: 100%; /* Full height */
+    width: 4px; /* Thickness of the line */
+    background-color: #007bff; /* Color of the line */
+    border-radius: 4px; /* Rounded edges */
+    transform: scaleY(0); /* Start with scale 0 */
+    transition: transform 0.3s ease; /* Smooth animation for the line */
+}
+
+.dropdown a:hover::before {
+    transform: scaleY(1); /* Scale to full height on hover */
+}
+
+.login-button {
+    background-color: #007bff; /* Button color */
+    color: white; /* Button text color */
+    padding: 12px 25px; /* Padding for button */
+    border: none; /* Remove border */
+    border-radius: 30px; /* Rounded button */
+    cursor: pointer; /* Pointer cursor */
+    font-size: 1.1em; /* Button font size */
+    margin: 5px; /* Margin around button */
+    transition: background-color 0.3s, transform 0.3s; /* Transition effects */
+    position: relative; /* For z-index positioning */
+    z-index: 2; /* Higher stacking order */
+}
+
+.login-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+    transform: translateY(-2px); /* Lift effect on hover */
+}
+
+
+
+        .carousel {
+            position: relative;
+            overflow: hidden;
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .carousel-inner {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-item {
+            min-width: 100%;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            text-align: center;
+            position: relative;
+        }
+
+        .carousel-item:nth-child(1) {
+            background-image: url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fHRyYXZlbHxlbnwwfHx8fDE2ODg0NjUwMzg&ixlib=rb-1.2.1&q=80&w=1080');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .carousel-item:nth-child(2) {
+            background-image: url('https://www.shutterstock.com/image-photo/summer-beach-sea-tourism-vacation-260nw-2476839183.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .carousel-item:nth-child(3) {
+            background-image: url('https://www.setmytrip.in/wp-content/uploads/2024/02/7xm.xyz399769-1-1024x683.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .carousel-content {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .carousel h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .carousel p {
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+        }
+
+        .control-button {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
+        }
+
+        .control-button:hover {
+            background-color: #ccc;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            background-color: #2c3e50;
+            color: #bdc3c7;
+            font-size: 0.9em;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <h1 class="title">Travel Buddy</h1>
+        <p class="tagline">Find Your adventure partner, anywhere and everywhere!</p>
+        <div style="position: relative;">
+            <button class="cta-button" id="exploreBtn">Explore Now</button>
+            <div class="dropdown" id="dropdownMenu">
+                <a href="guide.html">Buddy Login</a>
+                <a href="traveler.html">Traveller Login</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="carousel">
+        <div class="carousel-inner" id="carouselInner">
+            <div class="carousel-item">
+                <div class="carousel-content">
+                    <h2>Connect with Expert Tour Guides</h2>
+                    <p>At Travel Buddy, we believe that the best travel experiences come from connecting with knowledgeable local guides.</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="carousel-content">
+                    <h2>Personalized Travel Itineraries</h2>
+                    <p>We provide personalized travel itineraries tailored to your interests and preferences, ensuring a unique and memorable travel experience. Explore off-the-beaten-path destinations that fit your travel style.</p>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="carousel-content">
+                    <h2>Sustainable Travel Solutions</h2>
+                    <p>Join us in promoting sustainable travel practices. At Travel Buddy, we connect travelers with local communities, ensuring that your adventures positively impact the environment and local culture.</p>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-controls">
+            <button class="control-button" id="prevBtn">&#10094;</button>
+            <button class="control-button" id="nextBtn">&#10095;</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Travel Buddy. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const exploreBtn = document.getElementById('exploreBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const carouselInner = document.getElementById('carouselInner');
+        const carouselItems = document.querySelectorAll('.carousel-item');
+        let currentIndex = 0;
+
+        // Show dropdown on hover
+        exploreBtn.addEventListener('mouseenter', () => {
+            dropdownMenu.classList.add('show');
+        });
+
+        // Hide dropdown on click outside
+        document.addEventListener('click', (event) => {
+            if (!exploreBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+
+        // Function to show the current carousel item
+        const showItem = (index) => {
+            carouselInner.style.transform = `translateX(-${index * 100}%)`;
+        };
+
+        // Next button functionality
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % carouselItems.length;
+            showItem(currentIndex);
+        });
+
+        // Previous button functionality
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + carouselItems.length) % carouselItems.length;
+            showItem(currentIndex);
+        });
+
+        // Automatic carousel functionality
+        setInterval(() => {
+            currentIndex = (currentIndex + 1) % carouselItems.length;
+            showItem(currentIndex);
+        }, 5000); // Change slide every 5 seconds
+    </script>
+</body>
+</html>

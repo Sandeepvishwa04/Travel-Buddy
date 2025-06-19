@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buddy Details</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+    <style>
+        body {
+            background-image: url('./images/bgtb.avif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        .modal-content h3 {
+            color: #2196F3;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .close-button {
+            margin-top: 20px;
+            padding: 10px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .close-button:hover {
+            background-color: #45a049;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-buttons">
+        <button onclick="window.location.href='/guide.html'" class="nav-button back-button">
+            ← Back
+        </button>
+    </div>
+    <div class="form-container">
+        <div class="page-header">
+            <h2>Create Buddy Profile</h2>
+        </div>
+        
+        <div class="scrollable-container">
+            <form action="/submit_buddy_details" method="POST" class="form" enctype="multipart/form-data">
+                <label for="profile_picture">Profile Picture:</label>
+                <input type="file" id="profile_picture" name="profile_picture" accept="image/*" required>
+
+                <label for="guide_name">Name:</label>
+                <input type="text" id="guide_name" name="guide_name" required>
+
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option value="" disabled selected>Select your gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label for="guide_phone">Mobile no:</label>
+                <input type="tel" id="guide_phone" name="guide_phone" required>
+
+                <label for="country">Country:</label>
+                <input type="text" id="country" name="country" required>
+
+                <label for="state">State:</label>
+                <input type="text" id="state" name="state" required>
+
+                <label for="district">District:</label>
+                <input type="text" id="district" name="district" required>
+
+                <label for="place">Place:</label>
+                <input type="text" id="place" name="place" required>
+
+                <label for="price_per_hour">Price per hour (₹):</label>
+                <input type="number" id="price_per_hour" name="price_per_hour" min="0" required>
+
+                <div class="form-group">
+                    <label>Languages Known:</label>
+                    <div class="languages-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="English"> English
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Hindi"> Hindi
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Tamil"> Tamil
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Telugu"> Telugu
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Malayalam"> Malayalam
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Kannada"> Kannada
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Bengali"> Bengali
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Marathi"> Marathi
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Gujarati"> Gujarati
+                        </label>
+                        <label class="language-option">
+                            <input type="checkbox" name="languages" value="Punjabi"> Punjabi
+                        </label>
+                    </div>
+                </div>
+
+                <label for="available_from">Available From:</label>
+                <input type="date" id="available_from" name="available_from" required>
+
+                <label for="available_to">Available To:</label>
+                <input type="date" id="available_to" name="available_to" required>
+
+                <div class="button-container">
+                    <button type="submit">Submit</button>
+                    <button type="button" onclick="window.location.href='/'">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>🎉 Congratulations!</h3>
+            <p>Your details have been posted successfully!</p>
+            <p>Please login again to view and edit your profile.</p>
+            <button onclick="redirectToLogin()" class="close-button">Go to Login</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script>
+        const phoneInputField = document.querySelector("#guide_phone");
+        window.intlTelInput(phoneInputField, {
+            initialCountry: "auto",
+            geoIpLookup: function(success, failure) {
+                fetch('https://ipinfo.io?token=your_ip_token')  // Use an IP geolocation service token
+                    .then((resp) => resp.json())
+                    .then((resp) => success(resp.country))
+                    .catch(() => failure("us"));
+            },
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        });
+    </script>
+    <script>
+        function redirectToLogin() {
+            window.location.href = '/guide.html';
+        }
+
+        // Get the form element
+        const form = document.querySelector('form');
+        
+        // Add submit event listener
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const formData = new FormData(form);
+                
+                // Collect all selected languages
+                const selectedLanguages = [];
+                document.querySelectorAll('input[name="languages"]:checked').forEach(checkbox => {
+                    selectedLanguages.push(checkbox.value);
+                });
+                
+                // Add languages to formData
+                formData.append('languages', JSON.stringify(selectedLanguages));
+
+                const response = await fetch('/submit_buddy_details', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Show success modal
+                    document.getElementById('successModal').style.display = 'block';
+                    
+                    // Optional: Clear the form
+                    form.reset();
+                } else {
+                    throw new Error('Something went wrong');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to submit details. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
